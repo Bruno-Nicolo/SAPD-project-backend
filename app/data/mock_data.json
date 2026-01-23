@@ -1,0 +1,88 @@
+[
+  {
+    "name": "T-Shirt Sostenibile in Cotone Bio",
+    "components": [
+      {
+        "name": "Tessuto Corpo",
+        "material": "Cotone Biologico",
+        "weight_kg": 0.15,
+        "environmental_impact": 1.2
+      },
+      {
+        "name": "Etichetta",
+        "material": "Poliestere Riciclato",
+        "weight_kg": 0.005,
+        "environmental_impact": 0.05
+      },
+      {
+        "name": "Filo per cuciture",
+        "material": "Cotone",
+        "weight_kg": 0.01,
+        "environmental_impact": 0.2
+      }
+    ]
+  },
+  {
+    "name": "Jeans in Denim Riciclato",
+    "components": [
+      {
+        "name": "Tessuto Denim",
+        "material": "Denim Riciclato",
+        "weight_kg": 0.6,
+        "environmental_impact": 4.5
+      },
+      {
+        "name": "Bottone",
+        "material": "Acciaio",
+        "weight_kg": 0.02,
+        "environmental_impact": 0.8
+      },
+      {
+        "name": "Zip",
+        "material": "Ottone",
+        "weight_kg": 0.03,
+        "environmental_impact": 1.1
+      },
+      {
+        "name": "Fodera tasche",
+        "material": "Cotone",
+        "weight_kg": 0.05,
+        "environmental_impact": 0.4
+      }
+    ]
+  },
+  {
+    "name": "Sciarpa in Seta Organica",
+    "components": [
+      {
+        "name": "Seta",
+        "material": "Seta Organica",
+        "weight_kg": 0.1,
+        "environmental_impact": 2.5
+      }
+    ]
+  },
+  {
+    "name": "Sneakers Eco-Friendly",
+    "components": [
+      {
+        "name": "Suola",
+        "material": "Gomma Naturale",
+        "weight_kg": 0.4,
+        "environmental_impact": 1.8
+      },
+      {
+        "name": "Tomaia",
+        "material": "Pelle Vegana (Ananas)",
+        "weight_kg": 0.3,
+        "environmental_impact": 2.2
+      },
+      {
+        "name": "Lacci",
+        "material": "Canapa resistente",
+        "weight_kg": 0.02,
+        "environmental_impact": 0.1
+      }
+    ]
+  }
+]

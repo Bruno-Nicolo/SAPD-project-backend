@@ -1,6 +1,6 @@
 # Analisi dei Requisiti: Progetto EcoFashion Scorecard
 
-Il presente documento definisce i requisiti funzionali e non funzionali (FURPS+) del sistema EcoFashion Scorecard, con l'obiettivo di fornire una solida base per una progettazione orientata ai design patterns e ai principi SOLID.
+Il presente documento definisce i requisiti funzionali e non funzionali (FURPS+) del sistema EcoFashion Scorecard, con l'obiettivo di fornire una solida base per una progettazione orientata ai design patterns e ai principi SOLID. In questa repo verrà implementato solo il backend del progetto. Il frontend verrà implementato separatamente e chiamerà le API REST esposte da questo backend.
 
 ## 1. Requisiti Funzionali (Functionality)
 

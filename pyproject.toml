@@ -1,0 +1,25 @@
+[project]
+name = "ecofashion-scorecard"
+version = "0.1.0"
+description = "Backend API for EcoFashion Scorecard sustainability scoring system"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "pydantic>=2.10.0",
+    "pydantic-settings>=2.0.0",
+    "sqlalchemy>=2.0.0",
+    "python-jose[cryptography]>=3.3.0",
+    "python-multipart>=0.0.6",
+    "authlib>=1.3.0",
+    "httpx>=0.27.0",
+    "itsdangerous>=2.1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "httpx>=0.27.0",
+]
+
