@@ -65,11 +65,11 @@ async def auth_callback(request: Request, db: Session = Depends(get_db)):
         db.refresh(user)
     
     # Create JWT token
-    access_token = create_access_token(data={"sub": user.id})
+    access_token = create_access_token(data={"sub": str(user.id)})
     
     # Redirect to frontend with token
     return RedirectResponse(
-        url=f"{settings.FRONTEND_URL}/auth/success?token={access_token}"
+        url=f"{settings.FRONTEND_URL}/dashboard?token={access_token}"
     )
 
 
