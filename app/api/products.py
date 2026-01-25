@@ -10,6 +10,7 @@ from app.models.schemas import (
     ScoreResponse,
     BadgeApply,
     ComponentCreate,
+    ComponentResponse,
 )
 from app.core.patterns.composite import CompositeProduct, SimpleComponent
 from app.core.patterns.strategy import (
@@ -17,6 +18,7 @@ from app.core.patterns.strategy import (
     HiggIndexStrategy,
     CarbonFootprintStrategy,
     CircularEconomyStrategy,
+    CustomStrategy,
 )
 from app.core.patterns.decorator import (
     FairTradeBadge,
@@ -43,6 +45,7 @@ STRATEGY_MAP = {
     "higg_index": HiggIndexStrategy,
     "carbon_footprint": CarbonFootprintStrategy,
     "circular_economy": CircularEconomyStrategy,
+    "custom": CustomStrategy,
 }
 
 BADGE_MAP = {
@@ -51,6 +54,53 @@ BADGE_MAP = {
     "oekotex": OekoTexBadge,
     "non_compliant": NonCompliantBadge,
 }
+
+# Environmental impact per kg for common fashion materials
+# Values are approximate CO2 equivalent kg per kg of material
+MATERIAL_IMPACT_MAP: dict[str, float] = {
+    # Natural fibers
+    "cotton": 8.0,
+    "organic_cotton": 4.0,
+    "linen": 5.5,
+    "hemp": 3.5,
+    "wool": 12.0,
+    "silk": 15.0,
+    # Synthetic fibers
+    "polyester": 9.5,
+    "recycled_polyester": 5.0,
+    "nylon": 12.0,
+    "acrylic": 11.0,
+    "elastane": 10.0,
+    # Regenerated fibers
+    "viscose": 7.0,
+    "lyocell": 4.5,
+    "modal": 5.0,
+    # Leather and alternatives
+    "leather": 17.0,
+    "vegan_leather": 8.0,
+    "faux_leather": 9.0,
+    # Other materials
+    "rubber": 6.0,
+    "metal": 15.0,
+    "plastic": 10.0,
+    "recycled_plastic": 5.5,
+    "wood": 2.0,
+    "bamboo": 3.0,
+    "glass": 8.5,
+}
+
+# Default impact for unknown materials
+DEFAULT_MATERIAL_IMPACT = 10.0
+
+
+def get_material_impact(material: str) -> float:
+    """Get environmental impact score for a material.
+    
+    Looks up the material in the impact map (case-insensitive, with underscores for spaces).
+    Returns a default value if the material is not found.
+    """
+    normalized = material.lower().strip().replace(" ", "_").replace("-", "_")
+    return MATERIAL_IMPACT_MAP.get(normalized, DEFAULT_MATERIAL_IMPACT)
 
 
 def _db_product_to_composite(db_product: Product) -> CompositeProduct:
@@ -62,6 +112,11 @@ def _db_product_to_composite(db_product: Product) -> CompositeProduct:
             material=comp.material,
             weight_kg=comp.weight_kg,
             environmental_impact=comp.environmental_impact,
+            energy_consumption_mj=comp.energy_consumption_mj,
+            water_usage_liters=comp.water_usage_liters,
+            waste_generation_kg=comp.waste_generation_kg,
+            recyclability_score=comp.recyclability_score,
+            recycled_content_percentage=comp.recycled_content_percentage,
         )
         composite.add(simple)
     return composite
@@ -86,14 +141,20 @@ def create_product(
     db.add(db_product)
     db.flush()  # Get the ID
     
-    # Add components
+    # Add components with calculated environmental impact
     for comp in product_data.components:
+        environmental_impact = get_material_impact(comp.material)
         db_component = Component(
             product_id=db_product.id,
             name=comp.name,
             material=comp.material,
             weight_kg=comp.weight_kg,
-            environmental_impact=comp.environmental_impact,
+            environmental_impact=environmental_impact,
+            energy_consumption_mj=comp.energy_consumption_mj or 0.0,
+            water_usage_liters=comp.water_usage_liters or 0.0,
+            waste_generation_kg=comp.waste_generation_kg or 0.0,
+            recyclability_score=comp.recyclability_score or 0.0,
+            recycled_content_percentage=comp.recycled_content_percentage or 0.0,
         )
         db.add(db_component)
     
@@ -104,16 +165,32 @@ def create_product(
     composite = _db_product_to_composite(db_product)
     products_cache[db_product.id] = composite
     
+    # Calculate Average Score
+    higg_score = ScoringContext(HiggIndexStrategy()).calculate(composite)
+    carbon_score = ScoringContext(CarbonFootprintStrategy()).calculate(composite)
+    circular_score = ScoringContext(CircularEconomyStrategy()).calculate(composite)
+    
+    average_score = round((higg_score + carbon_score + circular_score) / 3.0, 1)
+    db_product.average_score = average_score
+    db.commit()
+    db.refresh(db_product)
+    
     return ProductResponse(
         id=db_product.id,
         name=db_product.name,
         total_impact=composite.get_base_impact_score(),
+        average_score=average_score,
         components=[
-            ComponentCreate(
+            ComponentResponse(
                 name=c.name,
                 material=c.material,
                 weight_kg=c.weight_kg,
                 environmental_impact=c.environmental_impact,
+                energy_consumption_mj=c.energy_consumption_mj,
+                water_usage_liters=c.water_usage_liters,
+                waste_generation_kg=c.waste_generation_kg,
+                recyclability_score=c.recyclability_score,
+                recycled_content_percentage=c.recycled_content_percentage,
             )
             for c in db_product.components
         ],
@@ -135,12 +212,18 @@ def list_products(
             id=db_product.id,
             name=db_product.name,
             total_impact=composite.get_base_impact_score(),
+            average_score=db_product.average_score,
             components=[
-                ComponentCreate(
+                ComponentResponse(
                     name=c.name,
                     material=c.material,
                     weight_kg=c.weight_kg,
                     environmental_impact=c.environmental_impact,
+                    energy_consumption_mj=c.energy_consumption_mj,
+                    water_usage_liters=c.water_usage_liters,
+                    waste_generation_kg=c.waste_generation_kg,
+                    recyclability_score=c.recyclability_score,
+                    recycled_content_percentage=c.recycled_content_percentage,
                 )
                 for c in db_product.components
             ],
@@ -169,12 +252,18 @@ def get_product(
         id=db_product.id,
         name=db_product.name,
         total_impact=composite.get_base_impact_score(),
+        average_score=db_product.average_score,
         components=[
-            ComponentCreate(
+            ComponentResponse(
                 name=c.name,
                 material=c.material,
                 weight_kg=c.weight_kg,
                 environmental_impact=c.environmental_impact,
+                energy_consumption_mj=c.energy_consumption_mj,
+                water_usage_liters=c.water_usage_liters,
+                waste_generation_kg=c.waste_generation_kg,
+                recyclability_score=c.recyclability_score,
+                recycled_content_percentage=c.recycled_content_percentage,
             )
             for c in db_product.components
         ],
@@ -191,9 +280,10 @@ async def upload_csv(
     Upload a CSV file to create products.
     
     Expected CSV format:
-    product_name,component_name,material,weight_kg,environmental_impact
+    product_name,component_name,material,weight_kg
     
     Products with the same name in the CSV will be grouped together.
+    Environmental impact is calculated automatically based on material.
     """
     if not file.filename.endswith('.csv'):
         raise HTTPException(status_code=400, detail="File must be a CSV")
@@ -203,7 +293,7 @@ async def upload_csv(
     reader = csv.DictReader(io.StringIO(decoded))
     
     # Check required columns
-    required_columns = {'product_name', 'component_name', 'material', 'weight_kg', 'environmental_impact'}
+    required_columns = {'product_name', 'component_name', 'material', 'weight_kg'}
     if not required_columns.issubset(set(reader.fieldnames or [])):
         raise HTTPException(
             status_code=400,
@@ -216,11 +306,12 @@ async def upload_csv(
         product_name = row['product_name'].strip()
         if product_name not in products_dict:
             products_dict[product_name] = []
+        material = row['material'].strip()
         products_dict[product_name].append({
             'name': row['component_name'].strip(),
-            'material': row['material'].strip(),
+            'material': material,
             'weight_kg': float(row['weight_kg']),
-            'environmental_impact': float(row['environmental_impact']),
+            'environmental_impact': get_material_impact(material),
         })
     
     # Create products
@@ -269,7 +360,12 @@ def calculate_score(
         raise HTTPException(status_code=400, detail="Invalid scoring strategy")
 
     composite = _get_composite_product(db_product)
-    strategy = STRATEGY_MAP[scoring_request.strategy]()
+    
+    if scoring_request.strategy == "custom":
+        strategy = CustomStrategy(scoring_request.custom_weights)
+    else:
+        strategy = STRATEGY_MAP[scoring_request.strategy]()
+        
     context = ScoringContext(strategy)
     score = context.calculate(composite)
 

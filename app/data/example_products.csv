@@ -1,11 +1,11 @@
-product_name,component_name,material,weight_kg,environmental_impact
-T-Shirt Sostenibile,Tessuto Corpo,Cotone Biologico,0.15,1.2
-T-Shirt Sostenibile,Etichetta,Poliestere Riciclato,0.005,0.05
-T-Shirt Sostenibile,Filo per cuciture,Cotone,0.01,0.2
-Jeans Denim Riciclato,Tessuto Denim,Denim Riciclato,0.6,4.5
-Jeans Denim Riciclato,Bottone,Acciaio,0.02,0.8
-Jeans Denim Riciclato,Zip,Ottone,0.03,1.1
-Jeans Denim Riciclato,Fodera tasche,Cotone,0.05,0.4
-Sneakers Eco,Suola,Gomma Naturale,0.4,1.8
-Sneakers Eco,Tomaia,Pelle Vegana,0.3,2.2
-Sneakers Eco,Lacci,Canapa,0.02,0.1
+product_name,component_name,material,weight_kg
+T-Shirt Sostenibile,Tessuto Corpo,organic_cotton,0.15
+T-Shirt Sostenibile,Etichetta,recycled_polyester,0.005
+T-Shirt Sostenibile,Filo per cuciture,cotton,0.010
+Jeans Denim Riciclato,Tessuto Denim,recycled_polyester,0.600
+Jeans Denim Riciclato,Bottone,metal,0.020
+Jeans Denim Riciclato,Zip,metal,0.030
+Jeans Denim Riciclato,Fodera tasche,cotton,0.050
+Sneakers Eco,Suola,rubber,0.400
+Sneakers Eco,Tomaia,vegan_leather,0.300
+Sneakers Eco,Lacci,hemp,0.020

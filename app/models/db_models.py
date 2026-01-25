@@ -27,6 +27,7 @@ class Product(Base):
     name = Column(String, nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
+    average_score = Column(Float, nullable=True)  # Calculated average of standard strategies
 
     # Relationships
     owner = relationship("User", back_populates="products")
@@ -42,7 +43,14 @@ class Component(Base):
     name = Column(String, nullable=False)
     material = Column(String, nullable=False)
     weight_kg = Column(Float, nullable=False)
-    environmental_impact = Column(Float, nullable=False)
+    environmental_impact = Column(Float, nullable=False)  # Calculated from material
+
+    # Detailed attributes for exact scoring
+    energy_consumption_mj = Column(Float, default=0.0)
+    water_usage_liters = Column(Float, default=0.0)
+    waste_generation_kg = Column(Float, default=0.0)
+    recyclability_score = Column(Float, default=0.0)
+    recycled_content_percentage = Column(Float, default=0.0)
 
     # Relationships
     product = relationship("Product", back_populates="components")
