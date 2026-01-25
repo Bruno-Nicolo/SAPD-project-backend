@@ -140,7 +140,7 @@ class CustomStrategy(ScoringStrategy):
         score += factors.get("recyclability", 0.0) * self.weights.get("recyclability", 0.0)
         score += factors.get("recycled_content", 0.0) * self.weights.get("recycled_content", 0.0)
         
-        return score
+        return round(max(0, min(100, score)), 2)
 
 
 class ScoringContext:

@@ -304,8 +304,13 @@ async def upload_csv(
     Expected CSV format:
     product_name,component_name,material,weight_kg
     
+    Optional columns:
+    energy_consumption_mj,water_usage_liters,waste_generation_kg,
+    recyclability_score,recycled_content_percentage
+    
     Products with the same name in the CSV will be grouped together.
     Environmental impact is calculated automatically based on material.
+    scores are calculated automatically for each product.
     """
     if not file.filename.endswith('.csv'):
         raise HTTPException(status_code=400, detail="File must be a CSV")
@@ -328,17 +333,35 @@ async def upload_csv(
         product_name = row['product_name'].strip()
         if product_name not in products_dict:
             products_dict[product_name] = []
+        
         material = row['material'].strip()
+        
+        # Helper to safely parse floats
+        def parse_float(key: str) -> float:
+            val = row.get(key)
+            if val and val.strip():
+                try:
+                    return float(val)
+                except ValueError:
+                    return 0.0
+            return 0.0
+
         products_dict[product_name].append({
             'name': row['component_name'].strip(),
             'material': material,
             'weight_kg': float(row['weight_kg']),
             'environmental_impact': get_material_impact(material),
+            'energy_consumption_mj': parse_float('energy_consumption_mj'),
+            'water_usage_liters': parse_float('water_usage_liters'),
+            'waste_generation_kg': parse_float('waste_generation_kg'),
+            'recyclability_score': parse_float('recyclability_score'),
+            'recycled_content_percentage': parse_float('recycled_content_percentage'),
         })
     
     # Create products
     created_products = []
     for product_name, components in products_dict.items():
+        # Create database product
         db_product = Product(name=product_name, user_id=current_user.id)
         db.add(db_product)
         db.flush()
@@ -350,8 +373,28 @@ async def upload_csv(
                 material=comp['material'],
                 weight_kg=comp['weight_kg'],
                 environmental_impact=comp['environmental_impact'],
+                energy_consumption_mj=comp['energy_consumption_mj'],
+                water_usage_liters=comp['water_usage_liters'],
+                waste_generation_kg=comp['waste_generation_kg'],
+                recyclability_score=comp['recyclability_score'],
+                recycled_content_percentage=comp['recycled_content_percentage'],
             )
             db.add(db_component)
+        
+        db.commit()
+        db.refresh(db_product)
+        
+        # Create composite for cache
+        composite = _db_product_to_composite(db_product)
+        products_cache[db_product.id] = composite
+        
+        # Calculate Average Score
+        higg_score = ScoringContext(HiggIndexStrategy()).calculate(composite)
+        carbon_score = ScoringContext(CarbonFootprintStrategy()).calculate(composite)
+        circular_score = ScoringContext(CircularEconomyStrategy()).calculate(composite)
+        
+        average_score = round((higg_score + carbon_score + circular_score) / 3.0, 1)
+        db_product.average_score = average_score
         
         created_products.append(product_name)
     
