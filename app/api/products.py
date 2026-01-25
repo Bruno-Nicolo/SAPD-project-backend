@@ -267,6 +267,31 @@ def get_product(
     )
 
 
+@router.delete("/{product_id}")
+def delete_product(
+    product_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Delete a specific product by ID."""
+    db_product = db.query(Product).filter(
+        Product.id == product_id,
+        Product.user_id == current_user.id
+    ).first()
+    
+    if not db_product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    
+    # Remove from cache if exists
+    if product_id in products_cache:
+        del products_cache[product_id]
+        
+    db.delete(db_product)
+    db.commit()
+    
+    return {"message": "Product deleted successfully"}
+
+
 @router.post("/upload")
 async def upload_csv(
     file: UploadFile = File(...),

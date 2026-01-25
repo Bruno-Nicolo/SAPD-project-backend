@@ -165,6 +165,10 @@ Gestione del catalogo prodotti e analisi di sostenibilità.
       - `name`, `material`, `weight_kg`, `environmental_impact`.
       - `energy_consumption_mj`, `water_usage_liters`, `waste_generation_kg`, `recyclability_score`, `recycled_content_percentage`.
 
+- **`DELETE /products/{id}`**
+  - **Descrizione**: Elimina definitivamente un prodotto e i suoi componenti.
+  - **Risposta**: JSON di conferma (`{"message": "Product deleted successfully"}`).
+
 - **`POST /products/upload`**
   - **Descrizione**: Caricamento bulk tramite file CSV.
   - **Request**: `multipart/form-data` con campo `file` (CSV).
