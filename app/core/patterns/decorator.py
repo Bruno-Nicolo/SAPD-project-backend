@@ -12,8 +12,9 @@ class ProductDecorator(ProductComponent, ABC):
     def get_score_modifier(self) -> float:
         pass
 
-    def get_base_impact_score(self) -> float:
-        return self._wrapped.get_base_impact_score() + self.get_score_modifier()
+    def get_impact_factors(self) -> dict[str, float]:
+        return self._wrapped.get_impact_factors()
+
 
     def accept(self, visitor) -> None:
         self._wrapped.accept(visitor)

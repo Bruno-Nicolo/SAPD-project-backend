@@ -178,7 +178,6 @@ def create_product(
     return ProductResponse(
         id=db_product.id,
         name=db_product.name,
-        total_impact=composite.get_base_impact_score(),
         average_score=average_score,
         components=[
             ComponentResponse(
@@ -211,7 +210,6 @@ def list_products(
         result.append(ProductResponse(
             id=db_product.id,
             name=db_product.name,
-            total_impact=composite.get_base_impact_score(),
             average_score=db_product.average_score,
             components=[
                 ComponentResponse(
@@ -251,7 +249,6 @@ def get_product(
     return ProductResponse(
         id=db_product.id,
         name=db_product.name,
-        total_impact=composite.get_base_impact_score(),
         average_score=db_product.average_score,
         components=[
             ComponentResponse(

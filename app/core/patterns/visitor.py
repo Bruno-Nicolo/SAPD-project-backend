@@ -21,11 +21,11 @@ class PdfReportVisitor(ProductVisitor):
         self.report_lines: list[str] = []
 
     def visit_simple_component(self, component: SimpleComponent) -> None:
-        line = f"Component: {component.name} | Material: {component.material} | Impact: {component.get_base_impact_score():.2f}"
+        line = f"Component: {component.name} | Material: {component.material}"
         self.report_lines.append(line)
 
     def visit_composite_product(self, product: CompositeProduct) -> None:
-        line = f"Product: {product.name} | Total Impact: {product.get_base_impact_score():.2f}"
+        line = f"Product: {product.name}"
         self.report_lines.append(line)
 
     def get_report(self) -> str:
@@ -55,12 +55,10 @@ class ComplianceAuditVisitor(ProductVisitor):
 class SocialReportVisitor(ProductVisitor):
     def __init__(self):
         self.total_weight_kg = 0.0
-        self.total_impact = 0.0
         self.component_count = 0
 
     def visit_simple_component(self, component: SimpleComponent) -> None:
         self.total_weight_kg += component.weight_kg
-        self.total_impact += component.get_base_impact_score()
         self.component_count += 1
 
     def visit_composite_product(self, product: CompositeProduct) -> None:
@@ -69,6 +67,5 @@ class SocialReportVisitor(ProductVisitor):
     def get_social_report(self) -> dict:
         return {
             "total_weight_kg": self.total_weight_kg,
-            "total_impact": self.total_impact,
             "component_count": self.component_count,
         }

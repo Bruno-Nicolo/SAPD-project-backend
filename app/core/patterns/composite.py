@@ -12,9 +12,6 @@ class ProductComponent(ABC):
         self.material = material
         self.weight_kg = weight_kg
 
-    @abstractmethod
-    def get_base_impact_score(self) -> float:
-        pass
 
     @abstractmethod
     def accept(self, visitor: ProductVisitor) -> None:
@@ -45,8 +42,6 @@ class SimpleComponent(ProductComponent):
         self.recyclability_score = recyclability_score
         self.recycled_content_percentage = recycled_content_percentage
 
-    def get_base_impact_score(self) -> float:
-        return self.environmental_impact * self.weight_kg
     
     def get_impact_factors(self) -> dict[str, float]:
         """Return raw impact factors for exact calculations."""
@@ -77,8 +72,6 @@ class CompositeProduct(ProductComponent):
     def get_children(self) -> list[ProductComponent]:
         return self._children.copy()
 
-    def get_base_impact_score(self) -> float:
-        return sum(child.get_base_impact_score() for child in self._children)
 
     def get_impact_factors(self) -> dict[str, float]:
         """Aggregate impact factors from children."""

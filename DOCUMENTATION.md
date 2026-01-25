@@ -160,7 +160,6 @@ Gestione del catalogo prodotti e analisi di sostenibilità.
   - **Risposta (`ProductResponse`)**:
     - `id` (int): ID del prodotto creato.
     - `name` (string): Nome del prodotto.
-    - `total_impact` (float): Impatto totale basato sul materiale.
     - `average_score` (float): **Calcolato alla creazione** come media delle 3 strategie standard.
     - `components` (list[`ComponentResponse`]):
       - `name`, `material`, `weight_kg`, `environmental_impact`.

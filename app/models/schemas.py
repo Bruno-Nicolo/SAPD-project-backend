@@ -52,7 +52,6 @@ class ScorecardCreate(BaseModel):
 class ProductResponse(BaseModel):
     id: int | None = None
     name: str
-    total_impact: float
     average_score: float | None = None
     components: list[ComponentResponse]
 
