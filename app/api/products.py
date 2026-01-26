@@ -1,6 +1,7 @@
 import csv
 import io
-from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
+from datetime import datetime
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Response
 from sqlalchemy.orm import Session
 
 from app.models.schemas import (
@@ -442,24 +443,182 @@ def calculate_score(
     return ScoreResponse(strategy=scoring_request.strategy, score=score)
 
 
-@router.get("/{product_id}/report/pdf")
+@router.get("/report/pdf")
 def generate_pdf_report(
-    product_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Generate a PDF report for a product."""
-    db_product = db.query(Product).filter(
-        Product.id == product_id,
-        Product.user_id == current_user.id
-    ).first()
+    """
+    Generate a PDF report for all user products.
     
-    if not db_product:
-        raise HTTPException(status_code=404, detail="Product not found")
-
-    composite = _get_composite_product(db_product)
-    visitor = PdfReportVisitor()
-    composite.accept(visitor)
-
-    return {"report": visitor.get_report()}
+    Returns a PDF file as binary response that can be downloaded directly.
+    """
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import mm
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+    from reportlab.lib.enums import TA_CENTER, TA_LEFT
+    
+    products = db.query(Product).filter(Product.user_id == current_user.id).all()
+    
+    if not products:
+        raise HTTPException(status_code=404, detail="No products found")
+    
+    # Create PDF buffer
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=20*mm, leftMargin=20*mm, topMargin=20*mm, bottomMargin=20*mm)
+    
+    # Styles
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=18,
+        alignment=TA_CENTER,
+        spaceAfter=20,
+        textColor=colors.HexColor('#1a5f2a')
+    )
+    subtitle_style = ParagraphStyle(
+        'CustomSubtitle',
+        parent=styles['Normal'],
+        fontSize=10,
+        alignment=TA_CENTER,
+        spaceAfter=10,
+        textColor=colors.grey
+    )
+    product_title_style = ParagraphStyle(
+        'ProductTitle',
+        parent=styles['Heading2'],
+        fontSize=14,
+        spaceAfter=10,
+        spaceBefore=15,
+        textColor=colors.HexColor('#2d5a3d')
+    )
+    section_style = ParagraphStyle(
+        'Section',
+        parent=styles['Heading3'],
+        fontSize=11,
+        spaceAfter=5,
+        spaceBefore=10,
+        textColor=colors.HexColor('#444444')
+    )
+    normal_style = ParagraphStyle(
+        'CustomNormal',
+        parent=styles['Normal'],
+        fontSize=9,
+        spaceAfter=3
+    )
+    
+    # Build content
+    content = []
+    
+    # Title
+    content.append(Paragraph("🌿 Sustainability Report", title_style))
+    content.append(Paragraph(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", subtitle_style))
+    content.append(Paragraph(f"User: {current_user.email} | Total Products: {len(products)}", subtitle_style))
+    content.append(Spacer(1, 10*mm))
+    
+    total_avg_score = 0
+    
+    for idx, db_product in enumerate(products, 1):
+        # Product header
+        content.append(Paragraph(f"Product #{idx}: {db_product.name}", product_title_style))
+        content.append(Paragraph(f"Average Score: <b>{db_product.average_score or 'N/A'}</b>", normal_style))
+        
+        # Components table
+        if db_product.components:
+            content.append(Paragraph("Components", section_style))
+            
+            table_data = [['Name', 'Material', 'Weight (kg)', 'Impact']]
+            for comp in db_product.components:
+                table_data.append([
+                    comp.name[:20],
+                    comp.material[:20],
+                    f"{comp.weight_kg:.3f}",
+                    f"{comp.environmental_impact:.2f}"
+                ])
+            
+            table = Table(table_data, colWidths=[50*mm, 50*mm, 30*mm, 25*mm])
+            table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2d5a3d')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('ALIGN', (2, 1), (-1, -1), 'RIGHT'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 9),
+                ('FONTSIZE', (0, 1), (-1, -1), 8),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+                ('TOPPADDING', (0, 0), (-1, 0), 8),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f8fdf9')),
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.HexColor('#f8fdf9'), colors.white]),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#cccccc')),
+            ]))
+            content.append(table)
+            
+            # Environmental metrics
+            content.append(Paragraph("Environmental Metrics", section_style))
+            
+            total_energy = sum(c.energy_consumption_mj for c in db_product.components)
+            total_water = sum(c.water_usage_liters for c in db_product.components)
+            total_waste = sum(c.waste_generation_kg for c in db_product.components)
+            avg_recyclability = sum(c.recyclability_score for c in db_product.components) / len(db_product.components)
+            
+            metrics_data = [
+                ['Energy Consumption', f"{total_energy:.2f} MJ"],
+                ['Water Usage', f"{total_water:.2f} L"],
+                ['Waste Generation', f"{total_waste:.3f} kg"],
+                ['Avg Recyclability', f"{avg_recyclability:.1f}%"]
+            ]
+            
+            metrics_table = Table(metrics_data, colWidths=[50*mm, 40*mm])
+            metrics_table.setStyle(TableStyle([
+                ('FONTSIZE', (0, 0), (-1, -1), 8),
+                ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
+                ('TEXTCOLOR', (0, 0), (0, -1), colors.grey),
+            ]))
+            content.append(metrics_table)
+        
+        if db_product.average_score:
+            total_avg_score += db_product.average_score
+        
+        content.append(Spacer(1, 5*mm))
+    
+    # Overall summary
+    content.append(Spacer(1, 10*mm))
+    content.append(Paragraph("Overall Summary", product_title_style))
+    
+    overall_avg = total_avg_score / len(products) if products else 0
+    summary_data = [
+        ['Total Products', str(len(products))],
+        ['Overall Average Score', f"{overall_avg:.1f}"]
+    ]
+    
+    summary_table = Table(summary_data, colWidths=[60*mm, 40*mm])
+    summary_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#e8f5e9')),
+        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
+        ('PADDING', (0, 0), (-1, -1), 10),
+        ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#2d5a3d')),
+    ]))
+    content.append(summary_table)
+    
+    # Build PDF
+    doc.build(content)
+    
+    # Get PDF bytes
+    pdf_bytes = buffer.getvalue()
+    buffer.close()
+    
+    filename = f"sustainability_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+    
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f"attachment; filename={filename}",
+        }
+    )
 
