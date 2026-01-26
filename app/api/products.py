@@ -1,8 +1,7 @@
-import csv
-import io
 from datetime import datetime
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Response
 from sqlalchemy.orm import Session
+import io
 
 from app.models.schemas import (
     ProductCreate,
@@ -29,8 +28,12 @@ from app.core.patterns.decorator import (
 from app.core.patterns.visitor import (
     PdfReportVisitor,
 )
+from app.core.patterns.adapter_facade import (
+    get_adapter_for_file,
+    get_supported_formats,
+)
 from app.core.database import get_db
-from app.core.dependencies import get_current_user, get_optional_user
+from app.core.dependencies import get_current_user
 from app.models.db_models import User, Product, Component
 
 router = APIRouter(prefix="/products", tags=["products"])
@@ -299,13 +302,15 @@ def delete_product(
 
 
 @router.post("/upload")
-async def upload_csv(
+async def upload_file(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     """
-    Upload a CSV file to create products.
+    Upload a file to create products.
+    
+    Supported formats: CSV
     
     Expected CSV format:
     product_name,component_name,material,weight_kg
@@ -314,76 +319,54 @@ async def upload_csv(
     energy_consumption_mj,water_usage_liters,waste_generation_kg,
     recyclability_score,recycled_content_percentage
     
-    Products with the same name in the CSV will be grouped together.
+    Products with the same name will be grouped together.
     Environmental impact is calculated automatically based on material.
-    scores are calculated automatically for each product.
+    Scores are calculated automatically for each product.
     """
-    if not file.filename.endswith('.csv'):
-        raise HTTPException(status_code=400, detail="File must be a CSV")
+    # Get adapter for file format (Adapter Pattern)
+    adapter = get_adapter_for_file(file.filename or "")
     
-    content = await file.read()
-    decoded = content.decode('utf-8')
-    reader = csv.DictReader(io.StringIO(decoded))
-    
-    # Check required columns
-    required_columns = {'product_name', 'component_name', 'material', 'weight_kg'}
-    if not required_columns.issubset(set(reader.fieldnames or [])):
+    if adapter is None:
+        supported = ", ".join(get_supported_formats())
         raise HTTPException(
             status_code=400,
-            detail=f"CSV must contain columns: {', '.join(required_columns)}"
+            detail=f"Unsupported file format. Supported formats: {supported}"
         )
     
-    # Group rows by product name
-    products_dict: dict[str, list] = {}
-    for row in reader:
-        product_name = row['product_name'].strip()
-        if product_name not in products_dict:
-            products_dict[product_name] = []
-        
-        material = row['material'].strip()
-        
-        # Helper to safely parse floats
-        def parse_float(key: str) -> float:
-            val = row.get(key)
-            if val and val.strip():
-                try:
-                    return float(val)
-                except ValueError:
-                    return 0.0
-            return 0.0
-
-        products_dict[product_name].append({
-            'name': row['component_name'].strip(),
-            'material': material,
-            'weight_kg': float(row['weight_kg']),
-            'environmental_impact': get_material_impact(material),
-            'energy_consumption_mj': parse_float('energy_consumption_mj'),
-            'water_usage_liters': parse_float('water_usage_liters'),
-            'waste_generation_kg': parse_float('waste_generation_kg'),
-            'recyclability_score': parse_float('recyclability_score'),
-            'recycled_content_percentage': parse_float('recycled_content_percentage'),
-        })
+    # Read and parse file using adapter
+    content = await file.read()
     
-    # Create products
+    try:
+        products_data = adapter.parse(content)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+    if not products_data:
+        raise HTTPException(status_code=400, detail="No products found in file")
+    
+    # Create products in database
     created_products = []
-    for product_name, components in products_dict.items():
+    
+    for product_data in products_data:
         # Create database product
-        db_product = Product(name=product_name, user_id=current_user.id)
+        db_product = Product(name=product_data.name, user_id=current_user.id)
         db.add(db_product)
         db.flush()
         
-        for comp in components:
+        # Create components
+        for comp in product_data.components:
+            material = comp.material
             db_component = Component(
                 product_id=db_product.id,
-                name=comp['name'],
-                material=comp['material'],
-                weight_kg=comp['weight_kg'],
-                environmental_impact=comp['environmental_impact'],
-                energy_consumption_mj=comp['energy_consumption_mj'],
-                water_usage_liters=comp['water_usage_liters'],
-                waste_generation_kg=comp['waste_generation_kg'],
-                recyclability_score=comp['recyclability_score'],
-                recycled_content_percentage=comp['recycled_content_percentage'],
+                name=comp.name,
+                material=material,
+                weight_kg=comp.weight_kg,
+                environmental_impact=get_material_impact(material),
+                energy_consumption_mj=comp.energy_consumption_mj,
+                water_usage_liters=comp.water_usage_liters,
+                waste_generation_kg=comp.waste_generation_kg,
+                recyclability_score=comp.recyclability_score,
+                recycled_content_percentage=comp.recycled_content_percentage,
             )
             db.add(db_component)
         
@@ -402,7 +385,7 @@ async def upload_csv(
         average_score = round((higg_score + carbon_score + circular_score) / 3.0, 1)
         db_product.average_score = average_score
         
-        created_products.append(product_name)
+        created_products.append(product_data.name)
     
     db.commit()
     
@@ -449,7 +432,10 @@ def generate_pdf_report(
     current_user: User = Depends(get_current_user),
 ):
     """
-    Generate a PDF report for all user products.
+    Generate a PDF report for all user products using the Visitor Pattern.
+    
+    The PdfReportVisitor traverses the product composite structure to collect
+    all necessary data, which is then used to generate the PDF report.
     
     Returns a PDF file as binary response that can be downloaded directly.
     """
@@ -458,16 +444,46 @@ def generate_pdf_report(
     from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
     from reportlab.lib.units import mm
     from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
-    from reportlab.lib.enums import TA_CENTER, TA_LEFT
+    from reportlab.lib.enums import TA_CENTER
     
-    products = db.query(Product).filter(Product.user_id == current_user.id).all()
+    db_products = db.query(Product).filter(Product.user_id == current_user.id).all()
     
-    if not products:
+    if not db_products:
         raise HTTPException(status_code=404, detail="No products found")
     
-    # Create PDF buffer
+    # =====================================================================
+    # VISITOR PATTERN: Use PdfReportVisitor to traverse and collect data
+    # =====================================================================
+    visitor = PdfReportVisitor()
+    
+    # Store average scores separately (from DB, not composite)
+    product_scores: dict[str, float | None] = {}
+    
+    for db_product in db_products:
+        # Get composite product from cache or create it
+        composite = _get_composite_product(db_product)
+        
+        # Use Visitor Pattern to traverse the composite and collect data
+        composite.accept(visitor)
+        
+        # Store the score from DB (decorated products may have modified scores)
+        product_scores[db_product.name] = db_product.average_score
+    
+    # Get collected data from visitor
+    products_data = visitor.get_products_data()
+    
+    # =====================================================================
+    # PDF Generation using data collected by the visitor
+    # =====================================================================
     buffer = io.BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=20*mm, leftMargin=20*mm, topMargin=20*mm, bottomMargin=20*mm)
+    doc = SimpleDocTemplate(
+        buffer, 
+        pagesize=A4, 
+        rightMargin=20*mm, 
+        leftMargin=20*mm, 
+        topMargin=20*mm, 
+        bottomMargin=20*mm
+    )
     
     # Styles
     styles = getSampleStyleSheet()
@@ -516,27 +532,33 @@ def generate_pdf_report(
     # Title
     content.append(Paragraph("🌿 Sustainability Report", title_style))
     content.append(Paragraph(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", subtitle_style))
-    content.append(Paragraph(f"User: {current_user.email} | Total Products: {len(products)}", subtitle_style))
+    content.append(Paragraph(f"User: {current_user.email} | Total Products: {len(products_data)}", subtitle_style))
     content.append(Spacer(1, 10*mm))
     
-    total_avg_score = 0
+    total_avg_score = 0.0
     
-    for idx, db_product in enumerate(products, 1):
-        # Product header
-        content.append(Paragraph(f"Product #{idx}: {db_product.name}", product_title_style))
-        content.append(Paragraph(f"Average Score: <b>{db_product.average_score or 'N/A'}</b>", normal_style))
+    # Iterate through visitor-collected product data
+    for idx, product_data in enumerate(products_data, 1):
+        product_name = product_data["name"]
+        components = product_data["components"]
+        impact_factors = product_data["impact_factors"]
+        avg_score = product_scores.get(product_name)
         
-        # Components table
-        if db_product.components:
+        # Product header
+        content.append(Paragraph(f"Product #{idx}: {product_name}", product_title_style))
+        content.append(Paragraph(f"Average Score: <b>{avg_score or 'N/A'}</b>", normal_style))
+        
+        # Components table (data collected by visitor)
+        if components:
             content.append(Paragraph("Components", section_style))
             
             table_data = [['Name', 'Material', 'Weight (kg)', 'Impact']]
-            for comp in db_product.components:
+            for comp in components:
                 table_data.append([
-                    comp.name[:20],
-                    comp.material[:20],
-                    f"{comp.weight_kg:.3f}",
-                    f"{comp.environmental_impact:.2f}"
+                    comp["name"][:20],
+                    comp["material"][:20],
+                    f"{comp['weight_kg']:.3f}",
+                    f"{comp['environmental_impact']:.2f}"
                 ])
             
             table = Table(table_data, colWidths=[50*mm, 50*mm, 30*mm, 25*mm])
@@ -556,19 +578,14 @@ def generate_pdf_report(
             ]))
             content.append(table)
             
-            # Environmental metrics
+            # Environmental metrics (using impact_factors from visitor)
             content.append(Paragraph("Environmental Metrics", section_style))
             
-            total_energy = sum(c.energy_consumption_mj for c in db_product.components)
-            total_water = sum(c.water_usage_liters for c in db_product.components)
-            total_waste = sum(c.waste_generation_kg for c in db_product.components)
-            avg_recyclability = sum(c.recyclability_score for c in db_product.components) / len(db_product.components)
-            
             metrics_data = [
-                ['Energy Consumption', f"{total_energy:.2f} MJ"],
-                ['Water Usage', f"{total_water:.2f} L"],
-                ['Waste Generation', f"{total_waste:.3f} kg"],
-                ['Avg Recyclability', f"{avg_recyclability:.1f}%"]
+                ['Energy Consumption', f"{impact_factors['energy']:.2f} MJ"],
+                ['Water Usage', f"{impact_factors['water']:.2f} L"],
+                ['Waste Generation', f"{impact_factors['waste']:.3f} kg"],
+                ['Avg Recyclability', f"{impact_factors['recyclability']:.1f}%"]
             ]
             
             metrics_table = Table(metrics_data, colWidths=[50*mm, 40*mm])
@@ -579,8 +596,8 @@ def generate_pdf_report(
             ]))
             content.append(metrics_table)
         
-        if db_product.average_score:
-            total_avg_score += db_product.average_score
+        if avg_score:
+            total_avg_score += avg_score
         
         content.append(Spacer(1, 5*mm))
     
@@ -588,9 +605,9 @@ def generate_pdf_report(
     content.append(Spacer(1, 10*mm))
     content.append(Paragraph("Overall Summary", product_title_style))
     
-    overall_avg = total_avg_score / len(products) if products else 0
+    overall_avg = total_avg_score / len(products_data) if products_data else 0
     summary_data = [
-        ['Total Products', str(len(products))],
+        ['Total Products', str(len(products_data))],
         ['Overall Average Score', f"{overall_avg:.1f}"]
     ]
     

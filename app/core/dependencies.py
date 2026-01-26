@@ -58,27 +58,3 @@ def get_current_user(
         raise credentials_exception
     
     return user
-
-
-def get_optional_user(
-    credentials: HTTPAuthorizationCredentials | None = Depends(HTTPBearer(auto_error=False)),
-    db: Session = Depends(get_db)
-) -> User | None:
-    """Dependency to optionally get the current user (for public endpoints)."""
-    if credentials is None:
-        return None
-    
-    payload = verify_token(credentials.credentials)
-    if payload is None:
-        return None
-    
-    user_id_str = payload.get("sub")
-    if user_id_str is None:
-        return None
-    
-    try:
-        user_id = int(user_id_str)
-    except (ValueError, TypeError):
-        return None
-    
-    return db.query(User).filter(User.id == user_id).first()

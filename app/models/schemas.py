@@ -41,11 +41,6 @@ class WeightUpdate(BaseModel):
     weights: dict[str, float]
 
 
-class ScorecardCreate(BaseModel):
-    product_name: str
-    score: float
-
-
 class ProductResponse(BaseModel):
     id: int | None = None
     name: str
@@ -58,12 +53,6 @@ class ScoreResponse(BaseModel):
     score: float
 
 
-class ScorecardResponse(BaseModel):
-    scorecard_id: str
-    product_name: str
-    score: float
-    state: str
-
-
 class HealthResponse(BaseModel):
     status: str
+

@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
-from app.api import products, scorecards, config, supply_chain, auth
+from app.api import products, config, auth
 from app.core.config import get_settings
 from app.core.database import init_db
 
@@ -44,9 +44,7 @@ app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 
 app.include_router(auth.router)
 app.include_router(products.router)
-app.include_router(scorecards.router)
 app.include_router(config.router)
-app.include_router(supply_chain.router)
 
 
 @app.get("/health")
