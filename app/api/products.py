@@ -38,9 +38,7 @@ from app.models.db_models import User, Product, Component
 
 router = APIRouter(prefix="/products", tags=["products"])
 
-# In-memory cache for pattern operations (scoring, badges, visitors)
-# This maintains compatibility with the existing pattern implementations
-products_cache: dict[int, CompositeProduct] = {}
+
 
 STRATEGY_MAP = {
     "higg_index": HiggIndexStrategy,
@@ -105,8 +103,11 @@ def get_material_impact(material: str) -> float:
 
 
 def _db_product_to_composite(db_product: Product) -> CompositeProduct:
-    """Convert a database Product to a CompositeProduct for pattern operations."""
-    composite = CompositeProduct(db_product.name)
+    """Convert a database Product to a CompositeProduct for pattern operations.
+    
+    Also applies any badges stored in the database using the Decorator pattern.
+    """
+    composite: CompositeProduct = CompositeProduct(db_product.name)
     for comp in db_product.components:
         simple = SimpleComponent(
             name=comp.name,
@@ -120,14 +121,16 @@ def _db_product_to_composite(db_product: Product) -> CompositeProduct:
             recycled_content_percentage=comp.recycled_content_percentage,
         )
         composite.add(simple)
-    return composite
-
-
-def _get_composite_product(db_product: Product) -> CompositeProduct:
-    """Get or create a CompositeProduct from cache."""
-    if db_product.id not in products_cache:
-        products_cache[db_product.id] = _db_product_to_composite(db_product)
-    return products_cache[db_product.id]
+    
+    # Apply badges using Decorator Pattern from DB data
+    badges = db_product.badges or []
+    decorated = composite
+    for badge_key in badges:
+        if badge_key in BADGE_MAP:
+            badge_class = BADGE_MAP[badge_key]
+            decorated = badge_class(decorated)
+    
+    return decorated
 
 
 @router.post("/", response_model=ProductResponse)
@@ -166,17 +169,8 @@ def create_product(
     db.commit()
     db.refresh(db_product)
     
-    # Create composite for cache
+    # Create decorated composite for scoring
     composite = _db_product_to_composite(db_product)
-    
-    # Apply badges using Decorator Pattern if provided
-    if product_data.badges:
-        for badge_key in product_data.badges:
-            if badge_key in BADGE_MAP:
-                badge_class = BADGE_MAP[badge_key]
-                composite = badge_class(composite)
-    
-    products_cache[db_product.id] = composite
     
     # Calculate Average Score (decorators will affect the score via get_score_modifier)
     higg_score = ScoringContext(HiggIndexStrategy()).calculate(composite)
@@ -220,7 +214,6 @@ def list_products(
     
     result = []
     for db_product in products:
-        composite = _get_composite_product(db_product)
         result.append(ProductResponse(
             id=db_product.id,
             name=db_product.name,
@@ -259,8 +252,6 @@ def get_product(
     if not db_product:
         raise HTTPException(status_code=404, detail="Product not found")
     
-    composite = _get_composite_product(db_product)
-    
     return ProductResponse(
         id=db_product.id,
         name=db_product.name,
@@ -297,10 +288,6 @@ def delete_product(
     
     if not db_product:
         raise HTTPException(status_code=404, detail="Product not found")
-    
-    # Remove from cache if exists
-    if product_id in products_cache:
-        del products_cache[product_id]
         
     db.delete(db_product)
     db.commit()
@@ -380,9 +367,8 @@ async def upload_file(
         db.commit()
         db.refresh(db_product)
         
-        # Create composite for cache
+        # Create decorated composite for scoring
         composite = _db_product_to_composite(db_product)
-        products_cache[db_product.id] = composite
         
         # Calculate Average Score
         higg_score = ScoringContext(HiggIndexStrategy()).calculate(composite)
@@ -420,7 +406,7 @@ def calculate_score(
     if scoring_request.strategy not in STRATEGY_MAP:
         raise HTTPException(status_code=400, detail="Invalid scoring strategy")
 
-    composite = _get_composite_product(db_product)
+    composite = _db_product_to_composite(db_product)
     
     if scoring_request.strategy == "custom":
         strategy = CustomStrategy(scoring_request.custom_weights)
@@ -467,8 +453,8 @@ def generate_pdf_report(
     product_scores: dict[str, float | None] = {}
     
     for db_product in db_products:
-        # Get composite product from cache or create it
-        composite = _get_composite_product(db_product)
+        # Create composite from DB
+        composite = _db_product_to_composite(db_product)
         
         # Use Visitor Pattern to traverse the composite and collect data
         composite.accept(visitor)

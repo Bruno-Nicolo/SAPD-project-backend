@@ -39,7 +39,7 @@ app/
 
 ### Database SQLite
 
-Il sistema utilizza SQLite per la persistenza dei dati. La configurazione è gestita tramite SQLAlchemy in `app/core/database.py`. I modelli ORM sono definiti in `app/models/db_models.py` e includono relazioni tra Utenti, Prodotti e Componenti.
+Il sistema utilizza SQLite per la persistenza dei dati. La configurazione è gestita tramite SQLAlchemy in `app/core/database.py`. I modelli ORM sono definiti in `app/models/db_models.py` e includono relazioni tra Utenti, Prodotti e Componenti. I prodotti hanno anche un campo JSON `badges` per persistere le certificazioni applicate.
 
 ### Autenticazione Google OAuth
 
@@ -80,7 +80,7 @@ Permette di cambiare l'algoritmo di calcolo della sostenibilità a runtime:
 
 Aggiunge "badges" (es. `FairTradeBadge`, `VeganBadge`) ai prodotti. I badge decorano l'oggetto Composite influenzandone lo score.
 
-**Applicazione**: I badge vengono applicati in fase di creazione del prodotto tramite il campo `badges` in `ProductCreate`.
+**Applicazione**: I badge vengono applicati in fase di creazione del prodotto tramite il campo `badges` in `ProductCreate` e vengono **persistiti nel database** nel campo JSON `badges` del prodotto.
 
 **Modificatori**:
 
