@@ -45,6 +45,7 @@ class ProductResponse(BaseModel):
     id: int | None = None
     name: str
     average_score: float | None = None
+    badges: list[str] = []
     components: list[ComponentResponse]
 
 

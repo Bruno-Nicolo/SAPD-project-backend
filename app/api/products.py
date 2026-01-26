@@ -137,8 +137,12 @@ def create_product(
     current_user: User = Depends(get_current_user),
 ):
     """Create a new product (requires authentication)."""
-    # Create database product
-    db_product = Product(name=product_data.name, user_id=current_user.id)
+    # Create database product with badges
+    db_product = Product(
+        name=product_data.name,
+        user_id=current_user.id,
+        badges=product_data.badges or []
+    )
     db.add(db_product)
     db.flush()  # Get the ID
     
@@ -188,6 +192,7 @@ def create_product(
         id=db_product.id,
         name=db_product.name,
         average_score=average_score,
+        badges=db_product.badges or [],
         components=[
             ComponentResponse(
                 name=c.name,
@@ -220,6 +225,7 @@ def list_products(
             id=db_product.id,
             name=db_product.name,
             average_score=db_product.average_score,
+            badges=db_product.badges or [],
             components=[
                 ComponentResponse(
                     name=c.name,
@@ -259,6 +265,7 @@ def get_product(
         id=db_product.id,
         name=db_product.name,
         average_score=db_product.average_score,
+        badges=db_product.badges or [],
         components=[
             ComponentResponse(
                 name=c.name,

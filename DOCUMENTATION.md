@@ -154,6 +154,7 @@ Gestione del catalogo prodotti e analisi di sostenibilità.
     - `id` (int): ID del prodotto creato.
     - `name` (string): Nome del prodotto.
     - `average_score` (float): **Calcolato alla creazione** come media delle 3 strategie standard, **influenzato dai badge applicati**.
+    - `badges` (list[string]): Lista dei badge applicati al prodotto.
     - `components` (list[`ComponentResponse`]):
       - `name`, `material`, `weight_kg`, `environmental_impact`.
       - `energy_consumption_mj`, `water_usage_liters`, `waste_generation_kg`, `recyclability_score`, `recycled_content_percentage`.

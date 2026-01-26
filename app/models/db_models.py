@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, JSON
 from sqlalchemy.orm import relationship
 
 from app.core.database import Base
@@ -28,6 +28,7 @@ class Product(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     average_score = Column(Float, nullable=True)  # Calculated average of standard strategies
+    badges = Column(JSON, default=list)  # List of badges: fairtrade, vegan, oekotex, non_compliant
 
     # Relationships
     owner = relationship("User", back_populates="products")
