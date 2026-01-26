@@ -78,6 +78,12 @@ Permette di cambiare l'algoritmo di calcolo della sostenibilità a runtime:
 ### F3. Decorator (`decorator.py`)
 
 Aggiunge "badges" (es. `FairTradeBadge`, `VeganBadge`) ai prodotti. I badge decorano l'oggetto Composite influenzandone lo score.
+**Applicazione**: I badge vengono applicati in fase di creazione del prodotto tramite il campo `badges` in `ProductCreate`.
+**Modificatori**:
+- `fairtrade`: -5.0 (bonus)
+- `vegan`: -3.0 (bonus)
+- `oekotex`: -4.0 (bonus)
+- `non_compliant`: +10.0 (penale)
 
 ### F4. Facade & Adapter (`adapter_facade.py`)
 
@@ -157,10 +163,11 @@ Gestione del catalogo prodotti e analisi di sostenibilità.
       - `waste_generation_kg` (float, opzionale): Rifiuti prodotti in kg.
       - `recyclability_score` (float, opzionale): Indice di riciclabilità (0.0 - 1.0).
       - `recycled_content_percentage` (float, opzionale): % di materiale riciclato (0.0 - 1.0).
+    - `badges` (list[string], opzionale): Lista di badge da applicare al prodotto (Decorator Pattern). Valori: `fairtrade`, `vegan`, `oekotex`, `non_compliant`. I badge influenzano il calcolo dell'`average_score`.
   - **Risposta (`ProductResponse`)**:
     - `id` (int): ID del prodotto creato.
     - `name` (string): Nome del prodotto.
-    - `average_score` (float): **Calcolato alla creazione** come media delle 3 strategie standard.
+    - `average_score` (float): **Calcolato alla creazione** come media delle 3 strategie standard, **influenzato dai badge applicati**.
     - `components` (list[`ComponentResponse`]):
       - `name`, `material`, `weight_kg`, `environmental_impact`.
       - `energy_consumption_mj`, `water_usage_liters`, `waste_generation_kg`, `recyclability_score`, `recycled_content_percentage`.
@@ -183,11 +190,6 @@ Gestione del catalogo prodotti e analisi di sostenibilità.
   - **Risposta (`ScoreResponse`)**:
     - `strategy` (string): La strategia utilizzata.
     - `score` (float): Il punteggio finale calcolato.
-
-- **`POST /products/{id}/badges`**
-  - **Descrizione**: Applica un badge (Decorator) al prodotto per influenzarne lo score.
-  - **Body (`BadgeApply`)**:
-    - `badge_type` (string): Uno tra `fairtrade`, `vegan`, `oekotex`, `non_compliant`.
 
 - **`GET /products/{id}/report/pdf`** | **`/compliance`** | **`/social`**
   - **Descrizione**: Genera report specifici usando il Visitor pattern.

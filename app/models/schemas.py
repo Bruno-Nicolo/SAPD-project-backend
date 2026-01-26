@@ -29,10 +29,7 @@ class ComponentResponse(BaseModel):
 class ProductCreate(BaseModel):
     name: str
     components: list[ComponentCreate]
-
-
-class BadgeApply(BaseModel):
-    badge_type: str
+    badges: list[str] | None = []  # Optional: fairtrade, vegan, oekotex, non_compliant
 
 
 class ScoringRequest(BaseModel):

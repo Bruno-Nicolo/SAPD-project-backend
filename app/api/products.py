@@ -8,7 +8,6 @@ from app.models.schemas import (
     ProductResponse,
     ScoringRequest,
     ScoreResponse,
-    BadgeApply,
     ComponentCreate,
     ComponentResponse,
 )
@@ -163,9 +162,17 @@ def create_product(
     
     # Create composite for cache
     composite = _db_product_to_composite(db_product)
+    
+    # Apply badges using Decorator Pattern if provided
+    if product_data.badges:
+        for badge_key in product_data.badges:
+            if badge_key in BADGE_MAP:
+                badge_class = BADGE_MAP[badge_key]
+                composite = badge_class(composite)
+    
     products_cache[db_product.id] = composite
     
-    # Calculate Average Score
+    # Calculate Average Score (decorators will affect the score via get_score_modifier)
     higg_score = ScoringContext(HiggIndexStrategy()).calculate(composite)
     carbon_score = ScoringContext(CarbonFootprintStrategy()).calculate(composite)
     circular_score = ScoringContext(CircularEconomyStrategy()).calculate(composite)
@@ -435,32 +442,6 @@ def calculate_score(
     score = context.calculate(composite)
 
     return ScoreResponse(strategy=scoring_request.strategy, score=score)
-
-
-@router.post("/{product_id}/badges")
-def apply_badge(
-    product_id: int,
-    badge_request: BadgeApply,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    """Apply a badge to a product."""
-    db_product = db.query(Product).filter(
-        Product.id == product_id,
-        Product.user_id == current_user.id
-    ).first()
-    
-    if not db_product:
-        raise HTTPException(status_code=404, detail="Product not found")
-    if badge_request.badge_type not in BADGE_MAP:
-        raise HTTPException(status_code=400, detail="Invalid badge type")
-
-    composite = _get_composite_product(db_product)
-    badge_class = BADGE_MAP[badge_request.badge_type]
-    decorated_product = badge_class(composite)
-    products_cache[db_product.id] = decorated_product
-
-    return {"message": f"Badge '{badge_request.badge_type}' applied successfully"}
 
 
 @router.get("/{product_id}/report/pdf")
