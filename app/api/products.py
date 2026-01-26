@@ -28,8 +28,6 @@ from app.core.patterns.decorator import (
 )
 from app.core.patterns.visitor import (
     PdfReportVisitor,
-    ComplianceAuditVisitor,
-    SocialReportVisitor,
 )
 from app.core.database import get_db
 from app.core.dependencies import get_current_user, get_optional_user
@@ -484,46 +482,3 @@ def generate_pdf_report(
 
     return {"report": visitor.get_report()}
 
-
-@router.get("/{product_id}/report/compliance")
-def generate_compliance_audit(
-    product_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    """Generate a compliance audit report for a product."""
-    db_product = db.query(Product).filter(
-        Product.id == product_id,
-        Product.user_id == current_user.id
-    ).first()
-    
-    if not db_product:
-        raise HTTPException(status_code=404, detail="Product not found")
-
-    composite = _get_composite_product(db_product)
-    visitor = ComplianceAuditVisitor()
-    composite.accept(visitor)
-
-    return visitor.get_audit_report()
-
-
-@router.get("/{product_id}/report/social")
-def generate_social_report(
-    product_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    """Generate a social report for a product."""
-    db_product = db.query(Product).filter(
-        Product.id == product_id,
-        Product.user_id == current_user.id
-    ).first()
-    
-    if not db_product:
-        raise HTTPException(status_code=404, detail="Product not found")
-
-    composite = _get_composite_product(db_product)
-    visitor = SocialReportVisitor()
-    composite.accept(visitor)
-
-    return visitor.get_social_report()

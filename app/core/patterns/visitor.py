@@ -21,51 +21,12 @@ class PdfReportVisitor(ProductVisitor):
         self.report_lines: list[str] = []
 
     def visit_simple_component(self, component: SimpleComponent) -> None:
-        line = f"Component: {component.name} | Material: {component.material}"
+        line = f"  - Component: {component.name:<20} | Material: {component.material:<20} | Weight: {component.weight_kg:.2f} kg"
         self.report_lines.append(line)
 
     def visit_composite_product(self, product: CompositeProduct) -> None:
-        line = f"Product: {product.name}"
+        line = f"Product Report: {product.name}\n" + "-" * 60
         self.report_lines.append(line)
 
     def get_report(self) -> str:
         return "\n".join(self.report_lines)
-
-
-class ComplianceAuditVisitor(ProductVisitor):
-    NON_COMPLIANT_MATERIALS = {"pvc", "conventional_cotton", "virgin_polyester"}
-
-    def __init__(self):
-        self.issues: list[str] = []
-
-    def visit_simple_component(self, component: SimpleComponent) -> None:
-        if component.material.lower() in self.NON_COMPLIANT_MATERIALS:
-            self.issues.append(f"Non-compliant material in '{component.name}': {component.material}")
-
-    def visit_composite_product(self, product: CompositeProduct) -> None:
-        pass
-
-    def is_compliant(self) -> bool:
-        return len(self.issues) == 0
-
-    def get_audit_report(self) -> dict:
-        return {"compliant": self.is_compliant(), "issues": self.issues}
-
-
-class SocialReportVisitor(ProductVisitor):
-    def __init__(self):
-        self.total_weight_kg = 0.0
-        self.component_count = 0
-
-    def visit_simple_component(self, component: SimpleComponent) -> None:
-        self.total_weight_kg += component.weight_kg
-        self.component_count += 1
-
-    def visit_composite_product(self, product: CompositeProduct) -> None:
-        pass
-
-    def get_social_report(self) -> dict:
-        return {
-            "total_weight_kg": self.total_weight_kg,
-            "component_count": self.component_count,
-        }
