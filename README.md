@@ -1,87 +1,79 @@
-# Analisi dei Requisiti: Progetto EcoFashion Scorecard
+# Istruzioni per l'Avvio
 
-Il presente documento definisce i requisiti funzionali e non funzionali (FURPS+) del sistema EcoFashion Scorecard, con l'obiettivo di fornire una solida base per una progettazione orientata ai design patterns e ai principi SOLID. In questa repo viene implementato il backend del progetto, con persistenza su **database SQLite** e autenticazione integrata.
+## Prerequisiti
 
-## 1. Requisiti Funzionali (Functionality)
+Prima di iniziare, assicurati di avere installato:
 
-### F1. Gestione Gerarchica dei Prodotti (Bill of Materials)
+- **Python 3.11** o superiore
+- **pip** (package manager per Python)
+- Un account Google Cloud (per le credenziali OAuth2)
 
-- Il sistema deve gestire capi di abbigliamento complessi composti da sub-componenti (es. tessuto, fodera, bottoni).
-- Ogni componente deve poter essere valutato individualmente o come parte di un aggregato, permettendo calcoli di impatto ricorsivi.
-- **Pattern suggerito:** Composite.
+## Passaggi per la configurazione
 
-### F2. Motore di Valutazione Multicriterio (Scoring Engine)
+1.  **Crea un ambiente virtuale** (consigliato per isolare le dipendenze):
 
-- Il sistema deve supportare diversi algoritmi di calcolo della sostenibilità (es. Higg Index, Carbon Footprint Focus, Circular Economy Score).
-- Gli utenti devono poter cambiare la strategia di calcolo a runtime per confrontare diversi schemi di rating.
-- **Pattern suggerito:** Strategy.
+    ```bash
+    python -m venv .venv
+    ```
 
-### F3. Arricchimento Dinamico delle Informazioni (Product Tagging)
+2.  **Attiva l'ambiente virtuale**:
+    - **macOS/Linux**:
+      ```bash
+      source .venv/bin/activate
+      ```
+    - **Windows**:
+      ```bash
+      .venv\Scripts\activate
+      ```
 
-- Deve essere possibile aggiungere "badges" o certificazioni (es. FairTrade, Vegan, Oeko-Tex) ai prodotti senza alterare la struttura delle classi base o del database.
-- Tali badge possono influenzare il calcolo finale dello score aggiungendo bonus o malus.
-- **Pattern suggerito:** Decorator.
+3.  **Installa le dipendenze**:
 
-### F4. Normalizzazione e Importazione Dati (Data Integration)
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-- Il sistema deve supportare l'importazione massiva di dati tramite **file CSV**.
-- Il sistema deve interfacciarsi con provider di dati eterogenei (API REST di partner, database legacy di audit).
-- La logica di business deve interagire con un'interfaccia di accesso ai dati unificata.
-- **Pattern suggerito:** Facade / Adapter.
+4.  **Configura le variabili d'ambiente**:
+    - Copia il file di esempio:
+      ```bash
+      cp .env.example .env
+      ```
+    - Apri il file `.env` e configura i seguenti valori:
+      - `GOOGLE_CLIENT_ID`: Il tuo Client ID da Google Cloud Console.
+      - `GOOGLE_CLIENT_SECRET`: Il tuo Client Secret da Google Cloud Console.
+      - `GOOGLE_REDIRECT_URI`: Solitamente `http://localhost:8000/auth/callback`.
+      - `SECRET_KEY`: Una stringa casuale per firmare i token JWT.
 
-### F5. Gestione del Ciclo di Vita della Scorecard (Lifecycle)
+## Avvio del Server
 
-- Ogni scorecard deve seguire un workflow definito: Draft -> In Review -> Certified -> Deprecated.
-- Il comportamento delle operazioni cambia in base allo stato corrente.
-- **Pattern suggerito:** State.
+Per avviare il server in modalità sviluppo:
 
-### F6. Sicurezza e Multi-utenza [NEW]
+```bash
+uvicorn app.main:app --reload
+```
 
-- L'accesso al sistema è protetto tramite **Google OAuth2**.
-- Ogni utente ha accesso solo ai propri prodotti e scorecard.
-- Il sistema gestisce sessioni sicure tramite JWT (JSON Web Tokens).
+Il server sarà attivo all'indirizzo: `http://127.0.0.1:8000`
 
-## 2. Usabilità (Usability)
+## Avvio con Docker
 
-### U1. Configurazione Parametrica dei Pesi
+Se preferisci utilizzare Docker, puoi avviare il singolo container del backend:
 
-- Gli amministratori devono poter configurare i pesi dei criteri di sostenibilità.
-- Le variazioni devono essere propagate istantaneamente ai moduli di calcolo attivi.
-- **Pattern suggerito:** Observer.
+1.  **Build dell'immagine**:
 
-### U2. Procedura Guidata di Inserimento (Wizard)
+    ```bash
+    docker build -t sapd-backend .
+    ```
 
-- La creazione di un'entità "Prodotto Sostenibile" deve avvenire tramite un processo guidato.
-- **Pattern suggerito:** Builder.
+2.  **Avvio del container**:
+    ```bash
+    docker run -p 8000:8000 --env-file .env sapd-backend
+    ```
 
-## 3. Affidabilità (Reliability)
+## Documentazione API
 
-### R1. Stima dei Dati Mancanti (AI Fallback)
+Una volta avviato il server, puoi esplorare le API tramite l'interfaccia interattiva di Swagger:
 
-- In caso di dati incompleti, il sistema delega a un modulo di "AI Estimation" la generazione di valori verosimili.
-- **Pattern suggerito:** Proxy / Chain of Responsibility.
+- **Swagger UI**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
-## 4. Prestazioni (Performance)
+## Database
 
-### P1. Caching dei Risultati Complessi
-
-- Il sistema deve implementare un meccanismo di memorizzazione dei risultati per calcoli onerosi.
-- **Pattern suggerito:** Proxy (Virtual/Caching).
-
-## 5. Manutenibilità (Supportability)
-
-### S1. Estensibilità delle Operazioni (Analysis Tools)
-
-- Deve essere possibile aggiungere nuove analisi (es. report PDF, audit legali) senza modificare le classi base.
-- **Pattern suggerito:** Visitor.
-
-### S2. Tracciabilità e Rollback
-
-- Ogni comando di modifica deve essere incapsulato per permetterne la tracciabilità e l'annullamento.
-- **Pattern suggerito:** Command.
-
----
-
-## Guide di Installazione e Setup
-
-Per istruzioni dettagliate su come configurare, eseguire e testare il progetto, consulta la [Documentazione Tecnica](DOCUMENTATION.md).
+L'applicazione utilizza **SQLite**. Al primo avvio, verrà creato automaticamente il file `ecofashion.db` nella root della cartella backend.
