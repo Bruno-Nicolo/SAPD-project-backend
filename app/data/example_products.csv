@@ -1,11 +1,40 @@
-product_name,component_name,material,weight_kg
-T-Shirt Sostenibile,Tessuto Corpo,organic_cotton,0.15
-T-Shirt Sostenibile,Etichetta,recycled_polyester,0.005
-T-Shirt Sostenibile,Filo per cuciture,cotton,0.010
-Jeans Denim Riciclato,Tessuto Denim,recycled_polyester,0.600
-Jeans Denim Riciclato,Bottone,metal,0.020
-Jeans Denim Riciclato,Zip,metal,0.030
-Jeans Denim Riciclato,Fodera tasche,cotton,0.050
-Sneakers Eco,Suola,rubber,0.400
-Sneakers Eco,Tomaia,vegan_leather,0.300
-Sneakers Eco,Lacci,hemp,0.020
+product_name,component_name,material,weight_kg,energy_consumption_mj,water_usage_liters,waste_generation_kg,recyclability_score,recycled_content_percentage
+Giacca Invernale Premium,Tessuto Esterno Lana,wool,150.0,4500.0,75000.0,22.5,35.0,0.0
+Giacca Invernale Premium,Fodera Interna,nylon,45.0,1350.0,4500.0,9.0,25.0,0.0
+Giacca Invernale Premium,Imbottitura Sintetica,acrylic,80.0,2400.0,8000.0,16.0,15.0,0.0
+Giacca Invernale Premium,Bottoni e Zip,metal,8.0,400.0,800.0,2.0,90.0,0.0
+Giacca Invernale Premium,Etichette,polyester,1.5,45.0,150.0,0.3,20.0,0.0
+Borsa in Pelle Lusso,Pelle Principale,leather,200.0,8000.0,200000.0,50.0,30.0,0.0
+Borsa in Pelle Lusso,Fodera Interna,silk,25.0,1000.0,12500.0,5.0,25.0,0.0
+Borsa in Pelle Lusso,Accessori Metallici,metal,15.0,750.0,1500.0,3.0,95.0,0.0
+Borsa in Pelle Lusso,Cuciture,nylon,2.0,60.0,200.0,0.4,10.0,0.0
+T-Shirt Eco Collection,Tessuto Corpo,organic_cotton,75.0,1125.0,7500.0,3.75,85.0,100.0
+T-Shirt Eco Collection,Etichetta,recycled_polyester,1.0,15.0,50.0,0.1,80.0,100.0
+T-Shirt Eco Collection,Filo Cuciture,organic_cotton,2.5,37.5,250.0,0.13,85.0,100.0
+Pantaloni Yoga Sostenibili,Tessuto Principale,lyocell,60.0,600.0,3000.0,3.0,90.0,0.0
+Pantaloni Yoga Sostenibili,Elastico Cintura,elastane,8.0,160.0,400.0,0.8,30.0,0.0
+Pantaloni Yoga Sostenibili,Etichetta,hemp,0.5,5.0,25.0,0.03,95.0,0.0
+Sneakers Fast Fashion,Tomaia Sintetica,plastic,180.0,5400.0,18000.0,36.0,10.0,0.0
+Sneakers Fast Fashion,Suola,rubber,300.0,6000.0,30000.0,45.0,20.0,0.0
+Sneakers Fast Fashion,Lacci,polyester,5.0,150.0,500.0,1.0,15.0,0.0
+Sneakers Fast Fashion,Soletta,plastic,40.0,1200.0,4000.0,8.0,10.0,0.0
+Cappotto Sostenibile,Tessuto Esterno,hemp,180.0,900.0,9000.0,9.0,95.0,0.0
+Cappotto Sostenibile,Fodera,modal,50.0,500.0,2500.0,2.5,85.0,0.0
+Cappotto Sostenibile,Bottoni,wood,3.0,15.0,30.0,0.15,100.0,0.0
+Cappotto Sostenibile,Imbottitura,recycled_polyester,70.0,700.0,3500.0,3.5,80.0,100.0
+Vestito da Sera Lusso,Tessuto Principale,silk,40.0,1600.0,20000.0,8.0,25.0,0.0
+Vestito da Sera Lusso,Decorazioni,glass,5.0,250.0,500.0,1.0,60.0,0.0
+Vestito da Sera Lusso,Fodera,viscose,15.0,450.0,1500.0,3.0,40.0,0.0
+Vestito da Sera Lusso,Zip,metal,2.0,100.0,200.0,0.4,90.0,0.0
+Maglia Sportiva Riciclata,Tessuto Principale,recycled_polyester,50.0,500.0,2500.0,2.5,85.0,100.0
+Maglia Sportiva Riciclata,Inserti Traspiranti,recycled_plastic,10.0,100.0,500.0,0.5,80.0,100.0
+Maglia Sportiva Riciclata,Etichetta,bamboo,0.5,5.0,25.0,0.03,95.0,0.0
+Jeans Tradizionale,Tessuto Denim,cotton,400.0,12000.0,400000.0,80.0,50.0,0.0
+Jeans Tradizionale,Rivetti,metal,5.0,250.0,500.0,1.0,95.0,0.0
+Jeans Tradizionale,Zip,metal,3.0,150.0,300.0,0.6,95.0,0.0
+Jeans Tradizionale,Etichetta Pelle,leather,4.0,160.0,4000.0,1.0,30.0,0.0
+Jeans Tradizionale,Fodera Tasche,cotton,20.0,600.0,20000.0,4.0,50.0,0.0
+Felpa Zero Waste,Tessuto Principale,organic_cotton,120.0,1800.0,12000.0,6.0,90.0,80.0
+Felpa Zero Waste,Cappuccio,organic_cotton,30.0,450.0,3000.0,1.5,90.0,80.0
+Felpa Zero Waste,Coulisse,hemp,2.0,20.0,100.0,0.1,95.0,0.0
+Felpa Zero Waste,Etichetta,bamboo,0.5,5.0,25.0,0.03,95.0,0.0

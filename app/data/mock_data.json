@@ -1,76 +1,441 @@
 [
   {
-    "name": "T-Shirt Sostenibile in Cotone Bio",
+    "name": "Giacca Invernale Premium",
+    "components": [
+      {
+        "name": "Tessuto Esterno Lana",
+        "material": "wool",
+        "weight_kg": 150.0,
+        "energy_consumption_mj": 4500.0,
+        "water_usage_liters": 75000.0,
+        "waste_generation_kg": 22.5,
+        "recyclability_score": 35.0,
+        "recycled_content_percentage": 0.0
+      },
+      {
+        "name": "Fodera Interna",
+        "material": "nylon",
+        "weight_kg": 45.0,
+        "energy_consumption_mj": 1350.0,
+        "water_usage_liters": 4500.0,
+        "waste_generation_kg": 9.0,
+        "recyclability_score": 25.0,
+        "recycled_content_percentage": 0.0
+      },
+      {
+        "name": "Imbottitura Sintetica",
+        "material": "acrylic",
+        "weight_kg": 80.0,
+        "energy_consumption_mj": 2400.0,
+        "water_usage_liters": 8000.0,
+        "waste_generation_kg": 16.0,
+        "recyclability_score": 15.0,
+        "recycled_content_percentage": 0.0
+      },
+      {
+        "name": "Bottoni e Zip",
+        "material": "metal",
+        "weight_kg": 8.0,
+        "energy_consumption_mj": 400.0,
+        "water_usage_liters": 800.0,
+        "waste_generation_kg": 2.0,
+        "recyclability_score": 90.0,
+        "recycled_content_percentage": 0.0
+      },
+      {
+        "name": "Etichette",
+        "material": "polyester",
+        "weight_kg": 1.5,
+        "energy_consumption_mj": 45.0,
+        "water_usage_liters": 150.0,
+        "waste_generation_kg": 0.3,
+        "recyclability_score": 20.0,
+        "recycled_content_percentage": 0.0
+      }
+    ]
+  },
+  {
+    "name": "Borsa in Pelle Lusso",
+    "components": [
+      {
+        "name": "Pelle Principale",
+        "material": "leather",
+        "weight_kg": 200.0,
+        "energy_consumption_mj": 8000.0,
+        "water_usage_liters": 200000.0,
+        "waste_generation_kg": 50.0,
+        "recyclability_score": 30.0,
+        "recycled_content_percentage": 0.0
+      },
+      {
+        "name": "Fodera Interna",
+        "material": "silk",
+        "weight_kg": 25.0,
+        "energy_consumption_mj": 1000.0,
+        "water_usage_liters": 12500.0,
+        "waste_generation_kg": 5.0,
+        "recyclability_score": 25.0,
+        "recycled_content_percentage": 0.0
+      },
+      {
+        "name": "Accessori Metallici",
+        "material": "metal",
+        "weight_kg": 15.0,
+        "energy_consumption_mj": 750.0,
+        "water_usage_liters": 1500.0,
+        "waste_generation_kg": 3.0,
+        "recyclability_score": 95.0,
+        "recycled_content_percentage": 0.0
+      },
+      {
+        "name": "Cuciture",
+        "material": "nylon",
+        "weight_kg": 2.0,
+        "energy_consumption_mj": 60.0,
+        "water_usage_liters": 200.0,
+        "waste_generation_kg": 0.4,
+        "recyclability_score": 10.0,
+        "recycled_content_percentage": 0.0
+      }
+    ]
+  },
+  {
+    "name": "T-Shirt Eco Collection",
     "components": [
       {
         "name": "Tessuto Corpo",
         "material": "organic_cotton",
-        "weight_kg": 0.15
+        "weight_kg": 75.0,
+        "energy_consumption_mj": 1125.0,
+        "water_usage_liters": 7500.0,
+        "waste_generation_kg": 3.75,
+        "recyclability_score": 85.0,
+        "recycled_content_percentage": 100.0
       },
       {
         "name": "Etichetta",
         "material": "recycled_polyester",
-        "weight_kg": 0.005
+        "weight_kg": 1.0,
+        "energy_consumption_mj": 15.0,
+        "water_usage_liters": 50.0,
+        "waste_generation_kg": 0.1,
+        "recyclability_score": 80.0,
+        "recycled_content_percentage": 100.0
       },
       {
-        "name": "Filo per cuciture",
-        "material": "cotton",
-        "weight_kg": 0.01
+        "name": "Filo Cuciture",
+        "material": "organic_cotton",
+        "weight_kg": 2.5,
+        "energy_consumption_mj": 37.5,
+        "water_usage_liters": 250.0,
+        "waste_generation_kg": 0.13,
+        "recyclability_score": 85.0,
+        "recycled_content_percentage": 100.0
       }
     ]
   },
   {
-    "name": "Jeans in Denim Riciclato",
+    "name": "Pantaloni Yoga Sostenibili",
     "components": [
       {
-        "name": "Tessuto Denim",
-        "material": "recycled_polyester",
-        "weight_kg": 0.6
+        "name": "Tessuto Principale",
+        "material": "lyocell",
+        "weight_kg": 60.0,
+        "energy_consumption_mj": 600.0,
+        "water_usage_liters": 3000.0,
+        "waste_generation_kg": 3.0,
+        "recyclability_score": 90.0,
+        "recycled_content_percentage": 0.0
       },
       {
-        "name": "Bottone",
-        "material": "metal",
-        "weight_kg": 0.02
+        "name": "Elastico Cintura",
+        "material": "elastane",
+        "weight_kg": 8.0,
+        "energy_consumption_mj": 160.0,
+        "water_usage_liters": 400.0,
+        "waste_generation_kg": 0.8,
+        "recyclability_score": 30.0,
+        "recycled_content_percentage": 0.0
+      },
+      {
+        "name": "Etichetta",
+        "material": "hemp",
+        "weight_kg": 0.5,
+        "energy_consumption_mj": 5.0,
+        "water_usage_liters": 25.0,
+        "waste_generation_kg": 0.03,
+        "recyclability_score": 95.0,
+        "recycled_content_percentage": 0.0
+      }
+    ]
+  },
+  {
+    "name": "Sneakers Fast Fashion",
+    "components": [
+      {
+        "name": "Tomaia Sintetica",
+        "material": "plastic",
+        "weight_kg": 180.0,
+        "energy_consumption_mj": 5400.0,
+        "water_usage_liters": 18000.0,
+        "waste_generation_kg": 36.0,
+        "recyclability_score": 10.0,
+        "recycled_content_percentage": 0.0
+      },
+      {
+        "name": "Suola",
+        "material": "rubber",
+        "weight_kg": 300.0,
+        "energy_consumption_mj": 6000.0,
+        "water_usage_liters": 30000.0,
+        "waste_generation_kg": 45.0,
+        "recyclability_score": 20.0,
+        "recycled_content_percentage": 0.0
+      },
+      {
+        "name": "Lacci",
+        "material": "polyester",
+        "weight_kg": 5.0,
+        "energy_consumption_mj": 150.0,
+        "water_usage_liters": 500.0,
+        "waste_generation_kg": 1.0,
+        "recyclability_score": 15.0,
+        "recycled_content_percentage": 0.0
+      },
+      {
+        "name": "Soletta",
+        "material": "plastic",
+        "weight_kg": 40.0,
+        "energy_consumption_mj": 1200.0,
+        "water_usage_liters": 4000.0,
+        "waste_generation_kg": 8.0,
+        "recyclability_score": 10.0,
+        "recycled_content_percentage": 0.0
+      }
+    ]
+  },
+  {
+    "name": "Cappotto Sostenibile",
+    "components": [
+      {
+        "name": "Tessuto Esterno",
+        "material": "hemp",
+        "weight_kg": 180.0,
+        "energy_consumption_mj": 900.0,
+        "water_usage_liters": 9000.0,
+        "waste_generation_kg": 9.0,
+        "recyclability_score": 95.0,
+        "recycled_content_percentage": 0.0
+      },
+      {
+        "name": "Fodera",
+        "material": "modal",
+        "weight_kg": 50.0,
+        "energy_consumption_mj": 500.0,
+        "water_usage_liters": 2500.0,
+        "waste_generation_kg": 2.5,
+        "recyclability_score": 85.0,
+        "recycled_content_percentage": 0.0
+      },
+      {
+        "name": "Bottoni",
+        "material": "wood",
+        "weight_kg": 3.0,
+        "energy_consumption_mj": 15.0,
+        "water_usage_liters": 30.0,
+        "waste_generation_kg": 0.15,
+        "recyclability_score": 100.0,
+        "recycled_content_percentage": 0.0
+      },
+      {
+        "name": "Imbottitura",
+        "material": "recycled_polyester",
+        "weight_kg": 70.0,
+        "energy_consumption_mj": 700.0,
+        "water_usage_liters": 3500.0,
+        "waste_generation_kg": 3.5,
+        "recyclability_score": 80.0,
+        "recycled_content_percentage": 100.0
+      }
+    ]
+  },
+  {
+    "name": "Vestito da Sera Lusso",
+    "components": [
+      {
+        "name": "Tessuto Principale",
+        "material": "silk",
+        "weight_kg": 40.0,
+        "energy_consumption_mj": 1600.0,
+        "water_usage_liters": 20000.0,
+        "waste_generation_kg": 8.0,
+        "recyclability_score": 25.0,
+        "recycled_content_percentage": 0.0
+      },
+      {
+        "name": "Decorazioni",
+        "material": "glass",
+        "weight_kg": 5.0,
+        "energy_consumption_mj": 250.0,
+        "water_usage_liters": 500.0,
+        "waste_generation_kg": 1.0,
+        "recyclability_score": 60.0,
+        "recycled_content_percentage": 0.0
+      },
+      {
+        "name": "Fodera",
+        "material": "viscose",
+        "weight_kg": 15.0,
+        "energy_consumption_mj": 450.0,
+        "water_usage_liters": 1500.0,
+        "waste_generation_kg": 3.0,
+        "recyclability_score": 40.0,
+        "recycled_content_percentage": 0.0
       },
       {
         "name": "Zip",
         "material": "metal",
-        "weight_kg": 0.03
+        "weight_kg": 2.0,
+        "energy_consumption_mj": 100.0,
+        "water_usage_liters": 200.0,
+        "waste_generation_kg": 0.4,
+        "recyclability_score": 90.0,
+        "recycled_content_percentage": 0.0
+      }
+    ]
+  },
+  {
+    "name": "Maglia Sportiva Riciclata",
+    "components": [
+      {
+        "name": "Tessuto Principale",
+        "material": "recycled_polyester",
+        "weight_kg": 50.0,
+        "energy_consumption_mj": 500.0,
+        "water_usage_liters": 2500.0,
+        "waste_generation_kg": 2.5,
+        "recyclability_score": 85.0,
+        "recycled_content_percentage": 100.0
       },
       {
-        "name": "Fodera tasche",
+        "name": "Inserti Traspiranti",
+        "material": "recycled_plastic",
+        "weight_kg": 10.0,
+        "energy_consumption_mj": 100.0,
+        "water_usage_liters": 500.0,
+        "waste_generation_kg": 0.5,
+        "recyclability_score": 80.0,
+        "recycled_content_percentage": 100.0
+      },
+      {
+        "name": "Etichetta",
+        "material": "bamboo",
+        "weight_kg": 0.5,
+        "energy_consumption_mj": 5.0,
+        "water_usage_liters": 25.0,
+        "waste_generation_kg": 0.03,
+        "recyclability_score": 95.0,
+        "recycled_content_percentage": 0.0
+      }
+    ]
+  },
+  {
+    "name": "Jeans Tradizionale",
+    "components": [
+      {
+        "name": "Tessuto Denim",
         "material": "cotton",
-        "weight_kg": 0.05
+        "weight_kg": 400.0,
+        "energy_consumption_mj": 12000.0,
+        "water_usage_liters": 400000.0,
+        "waste_generation_kg": 80.0,
+        "recyclability_score": 50.0,
+        "recycled_content_percentage": 0.0
+      },
+      {
+        "name": "Rivetti",
+        "material": "metal",
+        "weight_kg": 5.0,
+        "energy_consumption_mj": 250.0,
+        "water_usage_liters": 500.0,
+        "waste_generation_kg": 1.0,
+        "recyclability_score": 95.0,
+        "recycled_content_percentage": 0.0
+      },
+      {
+        "name": "Zip",
+        "material": "metal",
+        "weight_kg": 3.0,
+        "energy_consumption_mj": 150.0,
+        "water_usage_liters": 300.0,
+        "waste_generation_kg": 0.6,
+        "recyclability_score": 95.0,
+        "recycled_content_percentage": 0.0
+      },
+      {
+        "name": "Etichetta Pelle",
+        "material": "leather",
+        "weight_kg": 4.0,
+        "energy_consumption_mj": 160.0,
+        "water_usage_liters": 4000.0,
+        "waste_generation_kg": 1.0,
+        "recyclability_score": 30.0,
+        "recycled_content_percentage": 0.0
+      },
+      {
+        "name": "Fodera Tasche",
+        "material": "cotton",
+        "weight_kg": 20.0,
+        "energy_consumption_mj": 600.0,
+        "water_usage_liters": 20000.0,
+        "waste_generation_kg": 4.0,
+        "recyclability_score": 50.0,
+        "recycled_content_percentage": 0.0
       }
     ]
   },
   {
-    "name": "Sciarpa in Seta Organica",
+    "name": "Felpa Zero Waste",
     "components": [
       {
-        "name": "Seta",
-        "material": "silk",
-        "weight_kg": 0.1
-      }
-    ]
-  },
-  {
-    "name": "Sneakers Eco-Friendly",
-    "components": [
-      {
-        "name": "Suola",
-        "material": "rubber",
-        "weight_kg": 0.4
+        "name": "Tessuto Principale",
+        "material": "organic_cotton",
+        "weight_kg": 120.0,
+        "energy_consumption_mj": 1800.0,
+        "water_usage_liters": 12000.0,
+        "waste_generation_kg": 6.0,
+        "recyclability_score": 90.0,
+        "recycled_content_percentage": 80.0
       },
       {
-        "name": "Tomaia",
-        "material": "vegan_leather",
-        "weight_kg": 0.3
+        "name": "Cappuccio",
+        "material": "organic_cotton",
+        "weight_kg": 30.0,
+        "energy_consumption_mj": 450.0,
+        "water_usage_liters": 3000.0,
+        "waste_generation_kg": 1.5,
+        "recyclability_score": 90.0,
+        "recycled_content_percentage": 80.0
       },
       {
-        "name": "Lacci",
+        "name": "Coulisse",
         "material": "hemp",
-        "weight_kg": 0.02
+        "weight_kg": 2.0,
+        "energy_consumption_mj": 20.0,
+        "water_usage_liters": 100.0,
+        "waste_generation_kg": 0.1,
+        "recyclability_score": 95.0,
+        "recycled_content_percentage": 0.0
+      },
+      {
+        "name": "Etichetta",
+        "material": "bamboo",
+        "weight_kg": 0.5,
+        "energy_consumption_mj": 5.0,
+        "water_usage_liters": 25.0,
+        "waste_generation_kg": 0.03,
+        "recyclability_score": 95.0,
+        "recycled_content_percentage": 0.0
       }
     ]
   }
